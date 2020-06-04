@@ -154,8 +154,11 @@ def _get_winddiravg(dbm, ts, interval=600):
     for row in dbm.genSql("SELECT windDir FROM %s "
                           "WHERE dateTime>? AND dateTime<=?" %
                           dbm.table_name, (sts, ts)):
-        windDirSum += row[0]
-        windDirCount += 1
+
+        if row[0] is not None:
+            windDirSum += row[0]
+            windDirCount += 1
+
     return windDirSum**(1/float(windDirCount)) if windDirCount != 0 else None
 
 class WeatherCloud(weewx.restx.StdRESTbase):
