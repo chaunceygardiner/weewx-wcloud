@@ -62,7 +62,7 @@ import weewx.units
 import weewx.wxformulas
 from weeutil.weeutil import to_bool
 
-VERSION = "0.13"
+VERSION = "0.14"
 
 if weewx.__version__ < "3":
     raise weewx.UnsupportedFeature("weewx 3 is required, found %s" %
@@ -146,13 +146,17 @@ def _get_windhi(dbm, ts, interval=600):
  WHERE dateTime>? AND dateTime<=?""" % dbm.table_name, (sts, ts))
     return val[0] if val is not None else None
 
-# TODO: this is wrong. We want the *geometric* average, not the arithmetic average.
+# weathercloud wants the geometric average of winddir.
 def _get_winddiravg(dbm, ts, interval=600):
     sts = ts - interval
-    val = dbm.getSql("SELECT AVG(windDir) FROM %s "
-                     "WHERE dateTime>? AND dateTime<=?" %
-                     dbm.table_name, (sts, ts))
-    return val[0] if val is not None else None
+    windDirSum = 0.0
+    windDirCount = 0
+    for row in dbm.genSql("SELECT windDir FROM %s "
+                          "WHERE dateTime>? AND dateTime<=?" %
+                          dbm.table_name, (sts, ts)):
+        windDirSum += row[0]
+        windDirCount += 1
+    return windDirSum**(1/float(windDirCount)) if windDirCount != 0 else None
 
 class WeatherCloud(weewx.restx.StdRESTbase):
     def __init__(self, engine, config_dict):
