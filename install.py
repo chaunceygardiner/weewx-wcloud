@@ -19,6 +19,7 @@ class WeatherCloudInstaller(ExtensionInstaller):
             config={
                 'StdRESTful': {
                     'WeatherCloud': {
+                        'enable': 'False',
                         'id': 'INSERT_WEATHERCLOUD_ID',
                         'key': 'INSERT_WEATHERCLOUD_KEY'}}},
             files=[('bin/user', ['bin/user/wcloud.py'])]
